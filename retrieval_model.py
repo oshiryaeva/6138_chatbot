@@ -3,7 +3,6 @@ import json
 import os
 import pickle
 import random
-import random
 
 import nltk
 import numpy as np
@@ -12,6 +11,12 @@ from keras.models import Sequential, load_model
 from keras.optimizers import SGD
 from nltk.stem import WordNetLemmatizer
 
+# Dimensionality (number of features)
+dimensionality = 256
+# The batch size
+batch_size = 10
+# The number of training epochs
+epochs = 60
 
 lemmatizer = WordNetLemmatizer()
 words = []
@@ -31,7 +36,7 @@ for intent in intents['intents']:
         # добавление к списку классов
         if intent['tag'] not in classes:
             classes.append(intent['tag'])
-print(documents)
+
 # лемматизация, удаление дубликатов
 words = [lemmatizer.lemmatize(w.lower()) for w in words if w not in ignore_letters]
 words = sorted(list(set(words)))
@@ -76,11 +81,11 @@ train_x = list(training[:, 0])
 train_y = list(training[:, 1])
 print("Training data created")
 
-if not os.path.isfile('sequential.h5'):
+if not os.path.isfile('retrieval.h5'):
     # Создание модели - 3 слоя, в первом 128 нейронов, во втором 64 нейрона,
     # в третьем количество нейронов равно количеству интентов для составления прогноза (функция softmax)
     model = Sequential()
-    model.add(Dense(128, input_shape=(len(train_x[0]),), activation='relu'))
+    model.add(Dense(dimensionality, input_shape=(len(train_x[0]),), activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(64, activation='relu'))
     model.add(Dropout(0.5))
@@ -91,11 +96,11 @@ if not os.path.isfile('sequential.h5'):
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
     # Обучение и сохранение модели
-    hist = model.fit(np.array(train_x), np.array(train_y), epochs=10, batch_size=5, verbose=1)
-    model.save('sequential.h5', hist)
+    hist = model.fit(np.array(train_x), np.array(train_y), epochs=epochs, batch_size=batch_size, verbose=1)
+    model.save('retrieval.h5', hist)
     print("model created")
 
-model = load_model('sequential.h5')
+model = load_model('retrieval.h5')
 
 
 intents = json.loads(open('./data/intents.json', encoding='UTF8').read())

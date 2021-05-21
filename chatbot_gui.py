@@ -3,21 +3,16 @@ from tkinter import *
 
 import tensorflow as tf
 from keras.models import load_model
-from keras_seq2seq import getAnswer
-from sequential_with_intents import getAnswer
 
-global model
+from generative_model import getAnswer
+# from retrieval_model import getAnswer as get_answer_ret
 
-def parseArgs():
-    """
-    Parse the arguments from the given command line
-    Args:
-        args (list<str>): List of arguments to parse. If None, the default sys.argv will be parsed
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=int, default=1,
-                        help='tag to differentiate which model to store/load: '
-                             '1 for generative seq2seq, 2 for rule-based rnn with intents')
+selected_model = {
+    1: './retrieval.h5',
+    2: './generative.h5'
+}
+#model = load_model(selected_model.get(1))
+model = load_model(selected_model.get(2))
 
 def send():
     msg = EntryBox.get("1.0", 'end-1c').strip()
@@ -36,6 +31,10 @@ def send():
         ChatBox.yview(END)
 
 
+print('Чат-бот 6138 запущен')
+print()
+print('Версия TensorFlow: v{}'.format(tf.__version__))
+
 # Creating tkinter GUI
 root = Tk()
 root.title("6138 Чат-бот (Плешаков, Ширяева)")
@@ -48,7 +47,6 @@ root.resizable(width=False, height=False)
 ChatBox = Text(root, bd=0, bg="white", height="8", width="50", font="Arial", )
 ChatBox.insert(END,
                "Бот: " + "Привет. Я чат-бот Навуходоносор, я учусь на случайных диалогах. Пообщаемся?" + '\n\n')
-# ChatBox.config(state=DISABLED)
 
 # Bind scrollbar to Chat window
 scrollbar = Scrollbar(root, command=ChatBox.yview, cursor="heart")
@@ -68,15 +66,4 @@ EntryBox.place(x=6, y=401, height=90, width=300)
 SendButton.place(x=312, y=401, height=90)
 root.mainloop()
 
-print('Чат-бот 6138 запущен')
-print()
-print('Версия TensorFlow: v{}'.format(tf.__version__))
-args = sys.argv[1:]
-selected_model = {
-    1: './seq2seq.h5',
-    2: './sequential.h5'
-}
-if len(args) == 2 and args[0] == '-model':
-    model = load_model(selected_model.get(args[1]))
-else:
-    model = load_model(selected_model.get(2))
+

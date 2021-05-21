@@ -6,6 +6,18 @@ from keras.layers import Input, LSTM, Dense
 from keras.models import Model
 from keras.models import load_model
 
+# Number of input-response pairs in training dataset
+# The more the better, limited only by your computation capacity
+# My PC can process ~ 500 pairs, on 1000 it gets stuck
+pairs_num = 200
+# Dimensionality (number of features)
+dimensionality = 256
+# The batch size
+batch_size = 10
+# The number of training epochs, for good quality it should be at least 500
+# My PC need ~a day to run 400 epochs
+epochs = 60
+
 data_path = "./data/human_text.txt"
 data_path2 = "./data/robot_text.txt"
 # Defining lines as a list of each line
@@ -26,7 +38,7 @@ input_docs = []
 target_docs = []
 input_tokens = set()
 target_tokens = set()
-for line in pairs[:50]:
+for line in pairs[:pairs_num]:
     input_doc, target_doc = line[0], line[1]
     # Appending each input sentence to input_docs
     input_docs.append(input_doc)
@@ -84,11 +96,7 @@ for line, (input_doc, target_doc) in enumerate(zip(input_docs, target_docs)):
 print(pairs[:5])
 print(input_docs[:5])
 
-# Dimensionality
-dimensionality = 256
-# The batch size and number of epochs
-batch_size = 10
-epochs = 30
+
 # Encoder
 encoder_inputs = Input(shape=(None, num_encoder_tokens))
 encoder_lstm = LSTM(dimensionality, return_state=True)
@@ -102,7 +110,7 @@ decoder_dense = Dense(num_decoder_tokens, activation='softmax')
 decoder_outputs = decoder_dense(decoder_outputs)
 
 # Model
-if not os.path.isfile('seq2seq.h5'):
+if not os.path.isfile('generative.h5'):
     training_model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
     # Compiling
     training_model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'],
@@ -112,9 +120,10 @@ if not os.path.isfile('seq2seq.h5'):
     training_model.fit([encoder_input_data, decoder_input_data], decoder_target_data, batch_size=batch_size,
                        epochs=epochs,
                        validation_split=0.2)
-    training_model.save('seq2seq.h5')
+    training_model.save('generative.h5')
+    print("model created")
 
-training_model = load_model('seq2seq.h5')
+training_model = load_model('generative.h5')
 
 encoder_inputs = training_model.input[0]
 encoder_outputs, state_h_enc, state_c_enc = training_model.layers[2].output
@@ -162,9 +171,8 @@ def decode_response(test_input):
         # append the sampled word to the target sequence
         for word, index in target_features_dict.items():
             if sampled_token_index == index:
-                if word != sampled_token:
-                    if word != '<END>':
-                        decoded_sentence += ' {}'.format(sampled_token)
+                if word != '<END>':
+                    decoded_sentence += ' {}'.format(sampled_token)
                 sampled_token = word
         # repeat until we generate the end-of-sequence word 'end'
         # or we hit the length of answer limit
@@ -210,6 +218,9 @@ class ChatBot:
 
     # Method that will create a response using seq2seq model we built
     def generate_response(self, user_input):
+        if user_input in self.negative_responses:
+            print("Ок, до новых встреч!")
+            return
         input_matrix = self.string_to_matrix(user_input)
         chatbot_response = decode_response(input_matrix)
         # Remove <START> and <END> tokens from chatbot_response
@@ -229,4 +240,4 @@ def getAnswer(msg):
     chatbot.generate_response(user_input=msg)
 
 chatbot = ChatBot()
-chatbot.start_chat()
+#chatbot.start_chat()
