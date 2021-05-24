@@ -9,14 +9,14 @@ from keras.models import load_model
 # Number of input-response pairs in training dataset
 # The more the better, limited only by your computation capacity
 # My PC can process ~ 500 pairs, on 1000 it gets stuck
-pairs_num = 200
+pairs_num = 500
 # Dimensionality (number of features)
 dimensionality = 256
 # The batch size
 batch_size = 10
 # The number of training epochs, for good quality it should be at least 500
 # My PC need ~a day to run 400 epochs
-epochs = 60
+epochs = 600
 
 data_path = "./data/human_text.txt"
 data_path2 = "./data/robot_text.txt"

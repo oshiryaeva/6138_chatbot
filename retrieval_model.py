@@ -16,7 +16,7 @@ dimensionality = 256
 # The batch size
 batch_size = 10
 # The number of training epochs
-epochs = 60
+epochs = 600
 
 lemmatizer = WordNetLemmatizer()
 words = []
