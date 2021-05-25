@@ -145,12 +145,14 @@ def predict_class(sentence):
         return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
     return return_list
 
-def getAnswer(ints):
+def getAnswer(msg):
+    if msg != '':
+        ints = predict_class(msg)
     result = ''
     tag = ints[0]['intent']
     list_of_intents = intents['intents']
     for i in list_of_intents:
-        if (i['tag'] == tag):
+        if i['tag'] == tag:
             result = random.choice(i['responses'])
             break
     return result

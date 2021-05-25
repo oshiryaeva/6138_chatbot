@@ -16,7 +16,7 @@ dimensionality = 256
 batch_size = 10
 # The number of training epochs, for good quality it should be at least 500
 # My PC need ~a day to run 400 epochs
-epochs = 600
+epochs = 2000
 
 data_path = "./data/human_text.txt"
 data_path2 = "./data/robot_text.txt"
@@ -70,8 +70,12 @@ reverse_input_features_dict = dict(
 reverse_target_features_dict = dict(
     (i, token) for token, i in target_features_dict.items())
 
+# For more realistic result better use commeted lines
 max_encoder_seq_length = max([len(re.findall(r"[\w']+|[^\s\w]", input_doc)) for input_doc in input_docs])
 max_decoder_seq_length = max([len(re.findall(r"[\w']+|[^\s\w]", target_doc)) for target_doc in target_docs])
+# max_encoder_seq_length = 7
+# max_decoder_seq_length = 7
+
 
 encoder_input_data = np.zeros(
     (len(input_docs), max_encoder_seq_length, num_encoder_tokens),
@@ -95,7 +99,6 @@ for line, (input_doc, target_doc) in enumerate(zip(input_docs, target_docs)):
 
 print(pairs[:5])
 print(input_docs[:5])
-
 
 # Encoder
 encoder_inputs = Input(shape=(None, num_encoder_tokens))
@@ -176,7 +179,9 @@ def decode_response(test_input):
                 sampled_token = word
         # repeat until we generate the end-of-sequence word 'end'
         # or we hit the length of answer limit
-        if (sampled_token == '<END>' or len(decoded_sentence.split()) > max_decoder_seq_length):
+        if (sampled_token == '<END>'
+                or len(decoded_sentence.split()) > max_decoder_seq_length
+                or len(decoded_sentence.split()) > 7):
             stop_condition = True
         # Update the target sequence
         target_seq = np.zeros((1, 1, num_decoder_tokens))
@@ -236,8 +241,12 @@ class ChatBot:
                 return True
         return False
 
+
 def getAnswer(msg):
-    chatbot.generate_response(user_input=msg)
+    response = ''
+    response = chatbot.generate_response(user_input=msg)
+    return response
+
 
 chatbot = ChatBot()
-#chatbot.start_chat()
+# chatbot.start_chat()

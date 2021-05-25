@@ -5,11 +5,13 @@ import tensorflow as tf
 from keras.models import load_model
 
 from generative_model import getAnswer
-# from retrieval_model import getAnswer as get_answer_ret
+#from generative_model_eng import getAnswer
+#from retrieval_model import getAnswer
 
 selected_model = {
     1: './retrieval.h5',
-    2: './generative.h5'
+    2: './generative.h5',
+    3: './generative_eng.h5'
 }
 #model = load_model(selected_model.get(1))
 model = load_model(selected_model.get(2))
@@ -46,7 +48,8 @@ root.resizable(width=False, height=False)
 # Create Chat window
 ChatBox = Text(root, bd=0, bg="white", height="8", width="50", font="Arial", )
 ChatBox.insert(END,
-               "Бот: " + "Привет. Я чат-бот Навуходоносор, я учусь на случайных диалогах. Пообщаемся?" + '\n\n')
+               "Бот: " + "Привет. Я чат-бот Навуходоносор, " + '\n\n' +
+                         "я учусь на случайных диалогах. Пообщаемся?" + '\n\n')
 
 # Bind scrollbar to Chat window
 scrollbar = Scrollbar(root, command=ChatBox.yview, cursor="heart")
